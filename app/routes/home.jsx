@@ -44,7 +44,7 @@ export default function Home() {
   return (
     <div className="max-w-xl mx-auto p-6">
       <header className="mb-6 text-center">
-        <h1 className="text-3xl font-bold">🔐 Passify</h1>
+        <h1 className="text-3xl font-bold">🔐 Memorikey</h1>
         <p className="text-gray-600 dark:text-gray-300">
           Generate secure passwords using mnemonic phrases or personalized
           patterns.
