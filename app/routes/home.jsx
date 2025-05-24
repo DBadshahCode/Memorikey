@@ -79,7 +79,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             {Object.keys(patternInput).map((key) => (
               <label key={key} className="block">
-                {key}:
+                {key.charAt(0).toUpperCase() + key.slice(1)}:
                 <input
                   type="text"
                   value={patternInput[key]}
