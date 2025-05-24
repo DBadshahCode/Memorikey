@@ -17,15 +17,16 @@ export default function Home() {
   });
   const [length, setLength] = useState(12);
   const [count, setCount] = useState(5);
-  const [patternStructure, setPatternStructure] = useState("food-symbol-year-petInitial");
+  const [patternStructure, setPatternStructure] = useState(
+    "food-symbol-year-petInitial"
+  );
   const [shuffleSegments, setShuffleSegments] = useState(false);
   const [insertRandom, setInsertRandom] = useState(false);
   const [salt, setSalt] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const inputValue =
-      category === "mnemonic" ? mnemonicInput : patternInput;
+    const inputValue = category === "mnemonic" ? mnemonicInput : patternInput;
     navigate("/results", {
       state: {
         category,
@@ -35,7 +36,7 @@ export default function Home() {
         patternStructure,
         shuffleSegments,
         insertRandom,
-        salt
+        salt,
       },
     });
   };
@@ -46,7 +47,11 @@ export default function Home() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           Category:
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="ml-2">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="ml-2"
+          >
             <option value="mnemonic">Mnemonic</option>
             <option value="pattern">Pattern</option>
           </select>
@@ -101,14 +106,16 @@ export default function Home() {
                 type="checkbox"
                 checked={shuffleSegments}
                 onChange={(e) => setShuffleSegments(e.target.checked)}
-              /> Shuffle Segments
+              />{" "}
+              Shuffle Segments
             </label>
             <label className="col-span-2 block">
               <input
                 type="checkbox"
                 checked={insertRandom}
                 onChange={(e) => setInsertRandom(e.target.checked)}
-              /> Insert Random Characters
+              />{" "}
+              Insert Random Characters
             </label>
           </div>
         )}
@@ -144,6 +151,9 @@ export default function Home() {
           Generate
         </button>
       </form>
+      <footer className="text-center text-sm text-gray-500 mt-8">
+        Designed & Developed by Mohammed Suliyawala
+      </footer>
     </div>
   );
 }
