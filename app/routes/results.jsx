@@ -22,7 +22,7 @@ export default function Results() {
       patternStructure = "food-symbol-year-petInitial",
       shuffleSegments = false,
       insertRandom = false,
-      salt = ""
+      salt = "",
     } = state;
 
     let generated = [];
@@ -31,7 +31,16 @@ export default function Results() {
       if (category === "mnemonic") {
         generated.push(generateFromMnemonic(inputValue, length));
       } else {
-        generated.push(generateFromPattern(inputValue, length, patternStructure, shuffleSegments, insertRandom, salt));
+        generated.push(
+          generateFromPattern(
+            inputValue,
+            length,
+            patternStructure,
+            shuffleSegments,
+            insertRandom,
+            salt
+          )
+        );
       }
     }
 
@@ -39,7 +48,10 @@ export default function Results() {
 
     // Save to localStorage history
     const history = JSON.parse(localStorage.getItem("passwordHistory")) || [];
-    localStorage.setItem("passwordHistory", JSON.stringify([...history, ...generated]));
+    localStorage.setItem(
+      "passwordHistory",
+      JSON.stringify([...history, ...generated])
+    );
   }, [state, navigate]);
 
   const generateFromMnemonic = (sentence, length = 12) => {
@@ -51,7 +63,14 @@ export default function Results() {
     return (base + suffix).slice(0, length);
   };
 
-  const generateFromPattern = (userData, length = 12, structure, shuffle, insertRandom, salt) => {
+  const generateFromPattern = (
+    userData,
+    length = 12,
+    structure,
+    shuffle,
+    insertRandom,
+    salt
+  ) => {
     const { food, year, symbol, petInitial, randomWord, lucky } = userData;
     const tokens = {
       food,
@@ -62,7 +81,7 @@ export default function Results() {
       lucky,
     };
 
-    let segments = structure.split("-").map(part => tokens[part] || "");
+    let segments = structure.split("-").map((part) => tokens[part] || "");
 
     if (shuffle) {
       for (let i = segments.length - 1; i > 0; i--) {
@@ -75,7 +94,7 @@ export default function Results() {
 
     if (insertRandom) {
       password = password.replace(/[aeiou]/gi, () => {
-        const subs = ['@', '3', '1', '$', '*'];
+        const subs = ["@", "3", "1", "$", "*"];
         return subs[Math.floor(Math.random() * subs.length)];
       });
     }
@@ -88,7 +107,9 @@ export default function Results() {
   };
 
   const exportToCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8," + passwords.map(p => `"${p}"`).join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      passwords.map((p) => `"${p}"`).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -104,17 +125,35 @@ export default function Results() {
     if (/[a-z]/.test(pwd)) score++;
     if (/\d/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    return ["Too Short", "Weak", "Moderate", "Strong", "Very Strong", "Excellent"][score];
+    return [
+      "Too Short",
+      "Weak",
+      "Moderate",
+      "Strong",
+      "Very Strong",
+      "Excellent",
+    ][score];
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Generated Passwords</h1>
+      <header className="mb-6 text-center">
+        <h1 className="text-3xl font-bold">Generated Passwords</h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Here are your custom password results.
+        </p>
+      </header>
+
       <ul className="list-disc pl-5 space-y-2">
         {passwords.map((pwd, i) => (
-          <li key={i} className="text-lg font-mono flex items-center justify-between">
+          <li
+            key={i}
+            className="text-lg font-mono flex items-center justify-between"
+          >
             {pwd}
-            <span className="ml-4 text-sm text-gray-500">({getStrength(pwd)})</span>
+            <span className="ml-4 text-sm text-gray-500">
+              ({getStrength(pwd)})
+            </span>
             <button
               onClick={() => navigator.clipboard.writeText(pwd)}
               className="ml-2 text-sm text-blue-500 hover:underline"

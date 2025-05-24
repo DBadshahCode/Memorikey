@@ -43,14 +43,21 @@ export default function Home() {
 
   return (
     <div className="max-w-xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Password Generator</h1>
+      <header className="mb-6 text-center">
+        <h1 className="text-3xl font-bold">🔐 Passify</h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Generate secure passwords using mnemonic phrases or personalized
+          patterns.
+        </p>
+      </header>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           Category:
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="ml-2"
+            className="ml-2 p-2 border rounded bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-600"
           >
             <option value="mnemonic">Mnemonic</option>
             <option value="pattern">Pattern</option>
