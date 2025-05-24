@@ -1,108 +1,149 @@
+// home.jsx
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export function meta() {
-  return [
-    { title: "Mnemonic & Pattern Password Generator" },
-    { name: "description", content: "Generate secure and memorable passwords using mnemonics or custom patterns." },
-  ];
-}
-
 export default function Home() {
   const navigate = useNavigate();
-
   const [category, setCategory] = useState("mnemonic");
-  const [inputValue, setInputValue] = useState("");
+  const [mnemonicInput, setMnemonicInput] = useState("");
+  const [patternInput, setPatternInput] = useState({
+    food: "",
+    year: "",
+    symbol: "",
+    petInitial: "",
+    randomWord: "",
+    lucky: "",
+  });
   const [length, setLength] = useState(12);
   const [count, setCount] = useState(5);
+  const [patternStructure, setPatternStructure] = useState("food-symbol-year-petInitial");
+  const [shuffleSegments, setShuffleSegments] = useState(false);
+  const [insertRandom, setInsertRandom] = useState(false);
+  const [salt, setSalt] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const inputValue =
+      category === "mnemonic" ? mnemonicInput : patternInput;
     navigate("/results", {
       state: {
         category,
         inputValue,
         length,
         count,
+        patternStructure,
+        shuffleSegments,
+        insertRandom,
+        salt
       },
     });
   };
 
   return (
-    <main className="flex items-center justify-center pt-16 pb-4">
-      <div className="flex-1 flex flex-col items-center gap-12 min-h-0">
-        <header className="text-center">
-          <h1 className="text-3xl font-bold">Passify</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Create secure and memorable passwords using mnemonic or pattern-based methods.
-          </p>
-        </header>
+    <div className="max-w-xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Password Generator</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <label className="block">
+          Category:
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="ml-2">
+            <option value="mnemonic">Mnemonic</option>
+            <option value="pattern">Pattern</option>
+          </select>
+        </label>
 
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6 px-6">
-          <div>
-            <label className="block mb-1 font-medium">Choose Category:</label>
-            <select
-              className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="mnemonic">Mnemonic Based</option>
-              <option value="pattern">Pattern Based</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">
-              {category === "mnemonic" ? "Enter a sentence:" : "Enter pattern (comma-separated):"}
-            </label>
+        {category === "mnemonic" ? (
+          <label className="block">
+            Sentence:
             <input
               type="text"
+              value={mnemonicInput}
+              onChange={(e) => setMnemonicInput(e.target.value)}
               required
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder={
-                category === "mnemonic"
-                  ? "e.g., My dog eats pizza every Sunday"
-                  : "e.g., Pizza,1992,@,M"
-              }
-              className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
+              className="block w-full border p-2 mt-1"
             />
-          </div>
-
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block mb-1 font-medium">Password Length:</label>
+          </label>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {Object.keys(patternInput).map((key) => (
+              <label key={key} className="block">
+                {key}:
+                <input
+                  type="text"
+                  value={patternInput[key]}
+                  onChange={(e) =>
+                    setPatternInput({ ...patternInput, [key]: e.target.value })
+                  }
+                  className="block w-full border p-2 mt-1"
+                />
+              </label>
+            ))}
+            <label className="col-span-2 block">
+              Pattern Structure:
               <input
-                type="number"
-                value={length}
-                min={6}
-                max={32}
-                onChange={(e) => setLength(Number(e.target.value))}
-                className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
+                type="text"
+                value={patternStructure}
+                onChange={(e) => setPatternStructure(e.target.value)}
+                className="block w-full border p-2 mt-1"
               />
-            </div>
-
-            <div className="flex-1">
-              <label className="block mb-1 font-medium"># of Passwords:</label>
+            </label>
+            <label className="col-span-2 block">
+              Salt:
               <input
-                type="number"
-                value={count}
-                min={1}
-                max={20}
-                onChange={(e) => setCount(Number(e.target.value))}
-                className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
+                type="text"
+                value={salt}
+                onChange={(e) => setSalt(e.target.value)}
+                className="block w-full border p-2 mt-1"
               />
-            </div>
+            </label>
+            <label className="col-span-2 block">
+              <input
+                type="checkbox"
+                checked={shuffleSegments}
+                onChange={(e) => setShuffleSegments(e.target.checked)}
+              /> Shuffle Segments
+            </label>
+            <label className="col-span-2 block">
+              <input
+                type="checkbox"
+                checked={insertRandom}
+                onChange={(e) => setInsertRandom(e.target.checked)}
+              /> Insert Random Characters
+            </label>
           </div>
+        )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
-          >
-            Generate Passwords
-          </button>
-        </form>
-      </div>
-    </main>
+        <label className="block">
+          Password Length:
+          <input
+            type="number"
+            value={length}
+            onChange={(e) => setLength(Number(e.target.value))}
+            min={4}
+            max={32}
+            className="block w-full border p-2 mt-1"
+          />
+        </label>
+
+        <label className="block">
+          Number of Passwords:
+          <input
+            type="number"
+            value={count}
+            onChange={(e) => setCount(Number(e.target.value))}
+            min={1}
+            max={20}
+            className="block w-full border p-2 mt-1"
+          />
+        </label>
+
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Generate
+        </button>
+      </form>
+    </div>
   );
 }

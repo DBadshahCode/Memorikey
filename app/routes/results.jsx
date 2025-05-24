@@ -1,16 +1,11 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+// results.jsx
 
-export function meta() {
-  return [
-    { title: "Password Results - Passify" },
-    { name: "description", content: "Generated passwords based on your input." },
-  ];
-}
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Results() {
-  const navigate = useNavigate();
   const { state } = useLocation();
+  const navigate = useNavigate();
   const [passwords, setPasswords] = useState([]);
 
   useEffect(() => {
@@ -19,60 +14,121 @@ export default function Results() {
       return;
     }
 
-    const { category, inputValue, length, count } = state;
+    const {
+      category,
+      inputValue,
+      length = 12,
+      count = 5,
+      patternStructure = "food-symbol-year-petInitial",
+      shuffleSegments = false,
+      insertRandom = false,
+      salt = ""
+    } = state;
+
     let generated = [];
 
     for (let i = 0; i < count; i++) {
       if (category === "mnemonic") {
         generated.push(generateFromMnemonic(inputValue, length));
-      } else if (category === "pattern") {
-        generated.push(generateFromPattern(inputValue, length));
+      } else {
+        generated.push(generateFromPattern(inputValue, length, patternStructure, shuffleSegments, insertRandom, salt));
       }
     }
 
     setPasswords(generated);
+
+    // Save to localStorage history
+    const history = JSON.parse(localStorage.getItem("passwordHistory")) || [];
+    localStorage.setItem("passwordHistory", JSON.stringify([...history, ...generated]));
   }, [state, navigate]);
 
-  // 🔐 Generate from Mnemonic sentence
-  function generateFromMnemonic(sentence, length = 12) {
+  const generateFromMnemonic = (sentence, length = 12) => {
     const words = sentence.trim().split(" ");
     let base = words.map((w) => w[0].toUpperCase()).join("");
-    base = base.replace(/[AEIOU]/g, () => Math.floor(Math.random() * 10)); // optional random digit
+    base = base.replace(/[AEIOU]/g, () => Math.floor(Math.random() * 10));
     const symbols = ["!", "@", "#", "$"];
     const suffix = symbols[Math.floor(Math.random() * symbols.length)];
     return (base + suffix).slice(0, length);
-  }
+  };
 
-  // 🔐 Generate from Pattern input
-  function generateFromPattern({ food = "", year = "", symbol = "", petInitial = "" }, length = 12) {
-    let base = `${food}${year}${symbol}${(petInitial || "").toUpperCase()}`;
-    return base.slice(0, length);
-  }
+  const generateFromPattern = (userData, length = 12, structure, shuffle, insertRandom, salt) => {
+    const { food, year, symbol, petInitial, randomWord, lucky } = userData;
+    const tokens = {
+      food,
+      year,
+      symbol,
+      petInitial: petInitial?.toUpperCase(),
+      randomWord,
+      lucky,
+    };
 
+    let segments = structure.split("-").map(part => tokens[part] || "");
+
+    if (shuffle) {
+      for (let i = segments.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [segments[i], segments[j]] = [segments[j], segments[i]];
+      }
+    }
+
+    let password = segments.join("");
+
+    if (insertRandom) {
+      password = password.replace(/[aeiou]/gi, () => {
+        const subs = ['@', '3', '1', '$', '*'];
+        return subs[Math.floor(Math.random() * subs.length)];
+      });
+    }
+
+    if (salt) {
+      password += salt;
+    }
+
+    return password.slice(0, length);
+  };
+
+  const exportToCSV = () => {
+    const csvContent = "data:text/csv;charset=utf-8," + passwords.map(p => `"${p}"`).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "passwords.csv");
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  const getStrength = (pwd) => {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/\d/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return ["Too Short", "Weak", "Moderate", "Strong", "Very Strong", "Excellent"][score];
+  };
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-6">
-      <h1 className="text-2xl font-bold mb-6">🔐 Generated Passwords</h1>
-      {passwords.length > 0 ? (
-        <ul className="space-y-3">
-          {passwords.map((pwd, i) => (
-            <li
-              key={i}
-              className="p-3 bg-gray-100 dark:bg-gray-800 rounded text-lg font-mono"
+    <div className="p-6">
+      <h1 className="text-xl font-bold mb-4">Generated Passwords</h1>
+      <ul className="list-disc pl-5 space-y-2">
+        {passwords.map((pwd, i) => (
+          <li key={i} className="text-lg font-mono flex items-center justify-between">
+            {pwd}
+            <span className="ml-4 text-sm text-gray-500">({getStrength(pwd)})</span>
+            <button
+              onClick={() => navigator.clipboard.writeText(pwd)}
+              className="ml-2 text-sm text-blue-500 hover:underline"
             >
-              {pwd}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-gray-500">No passwords generated.</p>
-      )}
-
+              Copy
+            </button>
+          </li>
+        ))}
+      </ul>
       <button
-        onClick={() => navigate("/")}
-        className="mt-6 text-blue-600 hover:underline"
+        onClick={exportToCSV}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        🔙 Back to Generator
+        Export to CSV
       </button>
     </div>
   );
