@@ -93,8 +93,8 @@ export default function Results() {
     let password = segments.join("");
 
     if (insertRandom) {
-      password = password.replace(/[aeiou]/gi, () => {
-        const subs = ["@", "3", "1", "$", "*"];
+      password = password.replace(/[aeios]/gi, () => {
+        const subs = ["@", "3", "1", "0", "$",];
         return subs[Math.floor(Math.random() * subs.length)];
       });
     }
