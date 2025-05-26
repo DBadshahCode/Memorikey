@@ -43,12 +43,33 @@ export default function Results() {
   }, [state, navigate]);
 
   const generateFromMnemonic = (sentence, length = 12) => {
-    const words = sentence.trim().split(" ");
-    let base = words.map((w) => w[0].toUpperCase()).join("");
-    base = base.replace(/[AEIOU]/g, () => Math.floor(Math.random() * 10));
-    const symbols = ["!", "@", "#", "$"];
-    const suffix = symbols[Math.floor(Math.random() * symbols.length)];
-    return (base + suffix).slice(0, length);
+    const replacements = {
+      a: "@", A: "@",
+      e: "3", E: "3",
+      i: "1", I: "1",
+      o: "0", O: "0",
+      s: "$", S: "$",
+    };
+
+    const words = sentence.trim().split(/\s+/).filter(Boolean);
+    if (words.length < 3) return "TooShort";
+
+    let base = words.map(word => word[0]).join("");
+    base = base
+      .split("")
+      .map(char => (Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase()))
+      .map(char => replacements[char] || char)
+      .join("");
+
+    const symbols = ["!", "@", "#", "$", "%"];
+    const suffix = symbols[Math.floor(Math.random() * symbols.length)] + Math.floor(Math.random() * 100);
+
+    let finalPwd = base + suffix;
+    while (finalPwd.length < length) {
+      finalPwd += String.fromCharCode(33 + Math.floor(Math.random() * 15));
+    }
+
+    return finalPwd.slice(0, length);
   };
 
   const generateFromPattern = (
