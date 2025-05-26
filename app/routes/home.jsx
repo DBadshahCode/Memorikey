@@ -7,33 +7,24 @@ export default function Home() {
   const navigate = useNavigate();
   const [category, setCategory] = useState("mnemonic");
   const [mnemonicInput, setMnemonicInput] = useState("");
-  const [patternInput, setPatternInput] = useState({
-    food: "",
-    year: "",
-    symbol: "",
-    petInitial: "",
-    randomWord: "",
-    lucky: "",
-  });
+  const [segments, setSegments] = useState([{ label: "", value: "" }]);
   const [length, setLength] = useState(12);
   const [count, setCount] = useState(5);
-  const [patternStructure, setPatternStructure] = useState(
-    "food-symbol-year-petInitial"
-  );
   const [shuffleSegments, setShuffleSegments] = useState(false);
   const [insertRandom, setInsertRandom] = useState(false);
   const [salt, setSalt] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const inputValue = category === "mnemonic" ? mnemonicInput : patternInput;
+    const inputValue =
+      category === "mnemonic" ? mnemonicInput : segments;
+
     navigate("/results", {
       state: {
         category,
         inputValue,
         length,
         count,
-        patternStructure,
         shuffleSegments,
         insertRandom,
         salt,
@@ -41,13 +32,27 @@ export default function Home() {
     });
   };
 
+  const updateSegment = (index, field, value) => {
+    const updated = [...segments];
+    updated[index][field] = value;
+    setSegments(updated);
+  };
+
+  const addSegment = () => {
+    setSegments([...segments, { label: "", value: "" }]);
+  };
+
+  const removeSegment = (index) => {
+    const updated = segments.filter((_, i) => i !== index);
+    setSegments(updated);
+  };
+
   return (
     <div className="max-w-xl mx-auto p-6">
-      <header className="mb-6 text-center">
-        <h1 className="text-3xl font-bold">🔐 Memorikey</h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Generate secure passwords using mnemonic phrases or personalized
-          patterns.
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold mb-2 text-center">🔐 MemoriKey</h1>
+        <p className="text-center text-gray-600 dark:text-gray-300">
+          Generate passwords using a mnemonic sentence or personalized segment-based patterns.
         </p>
       </header>
 
@@ -76,31 +81,45 @@ export default function Home() {
             />
           </label>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
-            {Object.keys(patternInput).map((key) => (
-              <label key={key} className="block">
-                {key.charAt(0).toUpperCase() + key.slice(1)}:
+          <div className="space-y-4">
+            {segments.map((segment, index) => (
+              <div key={index} className="flex gap-2 items-center">
                 <input
                   type="text"
-                  value={patternInput[key]}
+                  placeholder={`Label ${index + 1}`}
+                  value={segment.label}
                   onChange={(e) =>
-                    setPatternInput({ ...patternInput, [key]: e.target.value })
+                    updateSegment(index, "label", e.target.value)
                   }
-                  className="block w-full border p-2 mt-1"
+                  className="w-1/2 border p-2"
                 />
-              </label>
+                <input
+                  type="text"
+                  placeholder="Value"
+                  value={segment.value}
+                  onChange={(e) =>
+                    updateSegment(index, "value", e.target.value)
+                  }
+                  className="w-1/2 border p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSegment(index)}
+                  className="text-red-500"
+                >
+                  ✕
+                </button>
+              </div>
             ))}
-            <label className="col-span-2 block">
-              Pattern Structure:
-              <input
-                type="text"
-                value={patternStructure}
-                onChange={(e) => setPatternStructure(e.target.value)}
-                className="block w-full border p-2 mt-1"
-              />
-            </label>
-            <label className="col-span-2 block">
-              Salt:
+            <button
+              type="button"
+              onClick={addSegment}
+              className="text-blue-600 hover:underline"
+            >
+              ➕ Add Segment
+            </button>
+            <label className="block">
+              Salt (optional):
               <input
                 type="text"
                 value={salt}
@@ -108,7 +127,7 @@ export default function Home() {
                 className="block w-full border p-2 mt-1"
               />
             </label>
-            <label className="col-span-2 block">
+            <label className="block">
               <input
                 type="checkbox"
                 checked={shuffleSegments}
@@ -116,7 +135,7 @@ export default function Home() {
               />{" "}
               Shuffle Segments
             </label>
-            <label className="col-span-2 block">
+            <label className="block">
               <input
                 type="checkbox"
                 checked={insertRandom}
@@ -158,8 +177,9 @@ export default function Home() {
           Generate
         </button>
       </form>
+
       <footer className="text-center text-sm text-gray-500 mt-8">
-        Designed & Developed by Mohammed Suliyawala
+        Designed & Developed by Your Name
       </footer>
     </div>
   );
