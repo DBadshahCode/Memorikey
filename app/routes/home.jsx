@@ -179,7 +179,7 @@ export default function Home() {
       </form>
 
       <footer className="text-center text-sm text-gray-500 mt-8">
-        Designed & Developed by Your Name
+        Designed & Developed by Mohammed Suliyawala
       </footer>
     </div>
   );
